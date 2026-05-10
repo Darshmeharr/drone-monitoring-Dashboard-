@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drone Monitoring Dashboard</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#0b0f19;
+    color:white;
+    overflow-x:hidden;
+}
+
+header{
+    background:#111827;
+    padding:20px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    border-bottom:2px solid #00ffd5;
+    letter-spacing:2px;
+}
+
+.dashboard{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+    padding:20px;
+}
+
+.video-section{
+    position:relative;
+    border:2px solid #00ffd5;
+    border-radius:20px;
+    overflow:hidden;
+    background:black;
+}
+
+video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.scan-line{
+    position:absolute;
+    width:100%;
+    height:4px;
+    background:#00ffd5;
+    animation:scan 3s linear infinite;
+}
+
+@keyframes scan{
+    0%{top:0;}
+    100%{top:100%;}
+}
+
+.side-panel{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.card{
+    background:#111827;
+    padding:20px;
+    border-radius:20px;
+    border:1px solid #1f2937;
+}
+
+.card h2{
+    margin-bottom:15px;
+    color:#00ffd5;
+}
+
+.status{
+    color:#00ff88;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.metric{
+    margin:10px 0;
+    font-size:18px;
+}
+
+.progress{
+    width:100%;
+    background:#1f2937;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.progress-fill{
+    height:20px;
+    background:#00ffd5;
+    width:85%;
+    text-align:center;
+    color:black;
+    font-weight:bold;
+}
+
+.logs{
+    height:200px;
+    overflow-y:auto;
+    font-size:14px;
+}
+
+.logs p{
+    margin-bottom:8px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:12px;
+    background:#00ffd5;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.03);
+}
+
+.map{
+    width:100%;
+    height:180px;
+    border-radius:15px;
+    background:
+    linear-gradient(90deg,#1f2937 1px,transparent 1px),
+    linear-gradient(#1f2937 1px,transparent 1px);
+    background-size:20px 20px;
+    position:relative;
+}
+
+.drone{
+    width:20px;
+    height:20px;
+    background:#00ffd5;
+    border-radius:50%;
+    position:absolute;
+    top:50%;
+    left:50%;
+    animation:moveDrone 5s infinite alternate ease-in-out;
+}
+
+@keyframes moveDrone{
+    0%{transform:translate(-50%,-50%);}
+    100%{transform:translate(80px,50px);}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+🛰️ DRONE MONITORING SYSTEM
+</header>
+
+<div class="dashboard">
+
+<div class="video-section">
+    <video id="video" autoplay muted></video>
+    <div class="scan-line"></div>
+</div>
+
+<div class="side-panel">
+
+<div class="card">
+    <h2>Drone Status</h2>
+
+    <div class="status">● ONLINE</div>
+
+    <div class="metric">Altitude: <span id="altitude">120</span> m</div>
+    <div class="metric">Speed: <span id="speed">42</span> km/h</div>
+    <div class="metric">Temperature: <span id="temp">36</span> °C</div>
+
+    <div class="progress">
+        <div class="progress-fill" id="battery">85%</div>
+    </div>
+
+    <button onclick="startDrone()">START MISSION</button>
+    <button onclick="stopDrone()">STOP MISSION</button>
+</div>
+
+<div class="card">
+    <h2>GPS Radar</h2>
+
+    <div class="map">
+        <div class="drone"></div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Flight Logs</h2>
+
+    <div class="logs" id="logs">
+        <p>➜ System Initialized...</p>
+    </div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+const video = document.getElementById("video");
+const logs = document.getElementById("logs");
+
+navigator.mediaDevices.getUserMedia({
+    video:true
+})
+.then(stream=>{
+    video.srcObject = stream;
+})
+.catch(()=>{
+    alert("Camera access denied");
+});
+
+let mission = false;
+let interval;
+
+function addLog(message){
+    const p = document.createElement("p");
+    p.innerText = "➜ " + message;
+    logs.prepend(p);
+}
+
+function startDrone(){
+
+    if(mission) return;
+
+    mission = true;
+
+    addLog("Drone Mission Started");
+
+    interval = setInterval(()=>{
+
+        let altitude =
+        Math.floor(Math.random()*200)+100;
+
+        let speed =
+        Math.floor(Math.random()*80)+20;
+
+        let temp =
+        Math.floor(Math.random()*15)+30;
+
+        let battery =
+        Math.floor(Math.random()*40)+60;
+
+        document.getElementById("altitude").innerText =
+        altitude;
+
+        document.getElementById("speed").innerText =
+        speed;
+
+        document.getElementById("temp").innerText =
+        temp;
+
+        document.getElementById("battery").style.width =
+        battery + "%";
+
+        document.getElementById("battery").innerText =
+        battery + "%";
+
+        addLog(
+        "Altitude " + altitude +
+        "m | Speed " + speed +
+        "km/h"
+        );
+
+    },2000);
+}
+
+function stopDrone(){
+
+    mission = false;
+
+    clearInterval(interval);
+
+    addLog("Drone Mission Stopped");
+}
+</script>
+
+</body>
+</html>
